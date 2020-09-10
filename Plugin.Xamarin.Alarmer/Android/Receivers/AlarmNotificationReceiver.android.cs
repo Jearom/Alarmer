@@ -1,27 +1,23 @@
-﻿using Android.App;
-using Android.Content;
-using Android.OS;
-using Android.Widget;
-using AndroidX.Core.App;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Android.Content;
+using Plugin.Xamarin.Alarmer.Shared.Constants;
 
-namespace Plugin.Plugin.Xamarin.Alarmer.Android.Receivers
+namespace Plugin.Xamarin.Alarmer.Android.Receivers
 {
-    [BroadcastReceiver(Enabled =true)]
+    [BroadcastReceiver(Enabled = true)]
     public class AlarmNotificationReceiver : BroadcastReceiver
     {
-       
 
         public override void OnReceive(Context context, Intent intent)
         {
-            Notification.Builder builder = new Notification.Builder(context,channelId);
+            var message = intent.GetStringExtra(Consts.MessageKey);
+            var title = intent.GetStringExtra(Consts.TitleKey);
+            bool enableSound = intent.GetBooleanExtra(Consts.SoundKey, false);
+            bool enableVibrate = intent.GetBooleanExtra(Consts.VibrateKey, false);
 
-            
+            Alarmer.Current.Notify(title, message, enableSound, enableVibrate);
+            Alarmer.Current.ReceiveNotification(title, message);
+
         }
 
-
-       
     }
 }

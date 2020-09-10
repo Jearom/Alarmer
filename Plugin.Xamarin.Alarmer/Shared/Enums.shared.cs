@@ -1,4 +1,4 @@
-﻿namespace Plugin.Plugin.Xamarin.Alarmer.Shared
+﻿namespace Plugin.Xamarin.Alarmer.Shared
 {
     public class Enums
     {

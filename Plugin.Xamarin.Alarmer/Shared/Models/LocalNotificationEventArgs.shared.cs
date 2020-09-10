@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Plugin.Plugin.Xamarin.Alarmer.Shared.Models
+namespace Plugin.Xamarin.Alarmer.Shared.Models
 {
     public class LocalNotificationEventArgs : EventArgs
     {
