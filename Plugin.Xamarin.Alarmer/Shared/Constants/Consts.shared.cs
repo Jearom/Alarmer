@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Plugin.Xamarin.Alarmer.Shared.Constants
+﻿namespace Plugin.Xamarin.Alarmer.Shared.Constants
 {
     public class Consts
     {
-        public const string TitleKey = "title";
-        public const string MessageKey = "message";
-        public const string SoundKey = "enableSound";
-        public const string VibrateKey = "enableVibrate";
-        public const string BadgeKey = "badgeCount";
+        internal const string NotificationIdKey = "notificationId";
+        internal const string TitleKey = "title";
+        internal const string MessageKey = "message";
+        internal const string OptionsKey = "notificationOptions";
+        internal const string BadgeKey = "badgeCount";
     }
 }

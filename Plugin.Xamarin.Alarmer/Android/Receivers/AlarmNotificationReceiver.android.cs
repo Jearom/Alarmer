@@ -1,23 +1,26 @@
 ﻿using Android.Content;
+using Newtonsoft.Json;
 using Plugin.Xamarin.Alarmer.Shared.Constants;
+using Plugin.Xamarin.Alarmer.Shared.Models;
 
 namespace Plugin.Xamarin.Alarmer.Android.Receivers
 {
     [BroadcastReceiver(Enabled = true)]
     public class AlarmNotificationReceiver : BroadcastReceiver
     {
-
         public override void OnReceive(Context context, Intent intent)
         {
+
+
+            var notificationId = intent.GetStringExtra(Consts.NotificationIdKey);
+
             var message = intent.GetStringExtra(Consts.MessageKey);
             var title = intent.GetStringExtra(Consts.TitleKey);
-            bool enableSound = intent.GetBooleanExtra(Consts.SoundKey, false);
-            bool enableVibrate = intent.GetBooleanExtra(Consts.VibrateKey, false);
 
-            Alarmer.Current.Notify(title, message, enableSound, enableVibrate);
-            Alarmer.Current.ReceiveNotification(title, message);
+            NotificationOptions options = JsonConvert.DeserializeObject<NotificationOptions>(intent.GetStringExtra(Consts.OptionsKey));
+
+            Alarmer.Current.Notify(title, message, notificationId, options);
 
         }
-
     }
 }

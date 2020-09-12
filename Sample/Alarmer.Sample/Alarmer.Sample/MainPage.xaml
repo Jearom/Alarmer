@@ -10,10 +10,16 @@
             <DatePicker Date="{Binding SelectedDate}" />
             <TimePicker Time="{Binding SelectedTime}"/>
         </StackLayout>
+        <Picker SelectedItem="{Binding SelectedSequnce}" ItemsSource="{Binding Sequences}">
+        </Picker>
+        <StackLayout Orientation="Horizontal">
+            <Label Text="interval"/>
+            <Entry Text="{Binding Interval}" Keyboard="Numeric"/>
+        </StackLayout>
 
         <StackLayout VerticalOptions="EndAndExpand">
             <Button Text="Start Alarm" Command="{Binding StartAlarm}"/>
-            <Button Text="Schedule Alarm"/>
+            <Button Text="Schedule Alarm" Command="{Binding ScheduleAlarm}"/>
         </StackLayout>
 
     </StackLayout>

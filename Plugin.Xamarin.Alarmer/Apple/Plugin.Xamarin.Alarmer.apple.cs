@@ -1,5 +1,6 @@
 ﻿using Plugin.Xamarin.Alarmer;
 using Plugin.Xamarin.Alarmer.Shared;
+using Plugin.Xamarin.Alarmer.Shared.Models;
 using System;
 using Xamarin.Forms;
 
@@ -11,22 +12,25 @@ namespace Plugin.Xamarin.Alarmer
     /// </summary>
     public class AlarmerImplementation : IAlarmer
     {
-        public void Initialize(string largeIcon, string smallIcon)
+        public event EventHandler<LocalNotificationEventArgs> NotificationReceived;
+        public event EventHandler<LocalNotificationEventArgs> NotificationSelectionReceived;
+
+        public DateTime GetNextAlarm()
         {
             throw new NotImplementedException();
         }
 
-        public int Notify(string title, string message, bool enableSound, bool enableVibrate)
+        public string Notify(string title, string message, string notificationId = null, NotificationOptions options = null)
         {
             throw new NotImplementedException();
         }
 
-        public void ReceiveNotification(string title, string message)
+        public void ReceiveSelectedNotification(string title, string message, string notificationId, string selectedAction)
         {
             throw new NotImplementedException();
         }
 
-        public string Schedule(string title, string message, DateTime StartTime, Enums.AlarmSequence alarmSequence, bool enableSound, bool enableVibrate, int interval = 1)
+        public string Schedule(string title, string message, DateTime StartTime, Enums.AlarmSequence alarmSequence, int interval, NotificationOptions options)
         {
             throw new NotImplementedException();
         }
