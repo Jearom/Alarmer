@@ -5,7 +5,7 @@ using Plugin.Xamarin.Alarmer.Shared.Models;
 
 namespace Plugin.Xamarin.Alarmer.Android.Receivers
 {
-    [BroadcastReceiver(Enabled = true)]
+    [BroadcastReceiver(Enabled = true, Exported = true)]
     public class AlarmNotificationReceiver : BroadcastReceiver
     {
         public override void OnReceive(Context context, Intent intent)
