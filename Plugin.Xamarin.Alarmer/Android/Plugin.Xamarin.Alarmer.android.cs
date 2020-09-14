@@ -177,6 +177,11 @@ namespace Plugin.Xamarin.Alarmer
             if (alarmOptions.AlarmSequence != Enums.AlarmSequence.OneTime)
                 AlarmCounter++;
 
+            if (alarmOptions?.TotalAlarmCount != null && AlarmCounter > alarmOptions.TotalAlarmCount)
+                return notificationId;
+
+            if (alarmOptions?.EndDate != null && alarmOptions.EndDate < DateTime.Now)
+                return notificationId;
             DateTime nextTime = CalculateNextTime(startTime, alarmOptions);
 
             var alarmIntent = CreateAlarmIntent(title, message, nextTime, alarmOptions, notificationId, options);

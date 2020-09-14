@@ -25,7 +25,7 @@ namespace Alarmer.Sample.ViewModel
             }
         }
 
-        private TimeSpan selectedTime;
+        private TimeSpan selectedTime = DateTime.Now.TimeOfDay;
         IAlarmer alrm;
         public MainPageViewModel()
         {
@@ -43,6 +43,33 @@ namespace Alarmer.Sample.ViewModel
                 OnPropertyChanged();
             }
         }
+
+        private TimeSpan selectedEndTime = DateTime.Now.TimeOfDay;
+
+        public TimeSpan SelectedEndTime
+        {
+            get { return selectedEndTime; }
+            set { selectedEndTime = value; }
+        }
+
+
+        private DateTime endDate = DateTime.Now.AddDays(1);
+
+        public DateTime EndDate
+        {
+            get { return endDate; }
+            set { endDate = value; }
+        }
+
+        private bool isEndDate;
+
+        public bool IsEndDate
+        {
+            get { return isEndDate; }
+            set { isEndDate = value; }
+        }
+
+
 
 
         private List<EnumModel> sequences = new List<EnumModel>
@@ -79,6 +106,14 @@ namespace Alarmer.Sample.ViewModel
             set { interval = value; }
         }
 
+        private int maxCount = 0;
+
+        public int MaxCount
+        {
+            get { return maxCount; }
+            set { maxCount = value; }
+        }
+
 
         public ICommand StartAlarm => new Command(() =>
         {
@@ -111,12 +146,17 @@ namespace Alarmer.Sample.ViewModel
 
             try
             {
+                DateTime? _endDate = null;
 
+                if (IsEndDate)
+                    _endDate = new DateTime(EndDate.Year, EndDate.Month, EndDate.Day, SelectedEndTime.Hours, SelectedEndTime.Minutes, SelectedEndTime.Seconds);
 
                 alrm.Schedule("Test Title", "Test Message", dateTime, new Plugin.Xamarin.Alarmer.Shared.Models.AlarmOptions
                 {
                     AlarmSequence = Enums.AlarmSequence.OneTime,
-                    Interval = 1
+                    Interval = 1,
+                    EndDate = _endDate,
+                    TotalAlarmCount = MaxCount
                 },
                     new Plugin.Xamarin.Alarmer.Shared.Models.NotificationOptions
                     {

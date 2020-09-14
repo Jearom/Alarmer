@@ -6,10 +6,23 @@
         <vm:MainPageViewModel/>
     </ContentPage.BindingContext>
     <StackLayout>
+        <Label Text="Start DateTimes"/>
         <StackLayout Orientation="Horizontal">
             <DatePicker Date="{Binding SelectedDate}" />
             <TimePicker Time="{Binding SelectedTime}" Format="HH:mm" />
         </StackLayout>
+
+        <StackLayout Orientation="Horizontal">
+            <Label Text="End DateTimes"/>
+            <Switch IsToggled="{Binding isEndDate}"/>
+        </StackLayout>
+        <StackLayout Orientation="Horizontal">
+            
+            <DatePicker Date="{Binding EndDate}" />
+            <TimePicker Time="{Binding SelectedEndTime}" Format="HH:mm" />
+            <Entry Keyboard="Numeric" Text="{Binding MaxCount}"/>
+        </StackLayout>
+        
         <Picker SelectedItem="{Binding SelectedSequnce}" ItemsSource="{Binding Sequences}">
         </Picker>
         <StackLayout Orientation="Horizontal">
