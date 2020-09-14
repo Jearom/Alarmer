@@ -4,7 +4,6 @@ using Android.Graphics;
 using Android.Media;
 using Android.OS;
 using Android.Support.V4.App;
-using Java.Lang;
 using Newtonsoft.Json;
 using Plugin.Xamarin.Alarmer;
 using Plugin.Xamarin.Alarmer.Android.Receivers;
@@ -12,10 +11,11 @@ using Plugin.Xamarin.Alarmer.Shared;
 using Plugin.Xamarin.Alarmer.Shared.Constants;
 using Plugin.Xamarin.Alarmer.Shared.Models;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Xamarin.Forms;
 using AndroidApp = Android.App;
 using Essential = Xamarin.Essentials;
-
 [assembly: Dependency(typeof(AlarmerImplementation))]
 namespace Plugin.Xamarin.Alarmer
 {
@@ -29,17 +29,22 @@ namespace Plugin.Xamarin.Alarmer
         const string channelName = "AlarmChannel";
         readonly string channelId = "default";
         int messageId = -1;
+        public int AlarmCounter { get; internal set; }
 
         public event EventHandler<LocalNotificationEventArgs> NotificationReceived;
         public event EventHandler<LocalNotificationEventArgs> NotificationSelectionReceived;
 
-        private Intent CreateAlarmIntent(string title, string message, string notificationId, NotificationOptions options)
+        private Intent CreateAlarmIntent(string title, string message, DateTime startTime, AlarmOptions alarmOptions, string notificationId, NotificationOptions options)
         {
+
             Intent intent = new Intent(Essential.Platform.CurrentActivity, typeof(AlarmNotificationReceiver));
             intent.SetAction(GetActionName(notificationId));
             intent.PutExtra(Consts.NotificationIdKey, notificationId);
             intent.PutExtra(Consts.TitleKey, title);
             intent.PutExtra(Consts.MessageKey, message);
+            intent.PutExtra(Consts.StartDateKey, JsonConvert.SerializeObject(startTime));
+            if (alarmOptions != null)
+                intent.PutExtra(Consts.AlarmOptionsKey, JsonConvert.SerializeObject(alarmOptions));
             if (options != null)
                 intent.PutExtra(Consts.OptionsKey, JsonConvert.SerializeObject(options));
 
@@ -74,7 +79,7 @@ namespace Plugin.Xamarin.Alarmer
             }
         }
 
-        private global::Android.Net.Uri GetAlarm(NotificationOptions options)
+        private global::Android.Net.Uri GetAlarmSound(NotificationOptions options)
         {
             global::Android.Net.Uri alert = null;
             if (options != null && options.EnableSound)
@@ -91,7 +96,7 @@ namespace Plugin.Xamarin.Alarmer
             return Essential.Platform.CurrentActivity.Resources.GetIdentifier(name, "drawable", Essential.AppInfo.PackageName);
         }
 
-        private void AddButtons(ref NotificationCompat.Builder builder,string notificationId, CustomAction[] actions)
+        private void AddButtons(ref NotificationCompat.Builder builder, string notificationId, CustomAction[] actions)
         {
             if (actions != null)
                 foreach (var item in actions)
@@ -99,9 +104,16 @@ namespace Plugin.Xamarin.Alarmer
                     Intent intent = new Intent(Essential.Platform.CurrentActivity, typeof(NotificationSelectionReceiver));
                     intent.SetAction(item.Name);
                     intent.PutExtra(Consts.NotificationIdKey, notificationId);
+                    intent.PutExtra(Consts.AlarmCounterKey, AlarmCounter);
                     PendingIntent pendingIntent = PendingIntent.GetBroadcast(Essential.Platform.CurrentActivity, 12345, intent, PendingIntentFlags.UpdateCurrent);
                     builder.AddAction(GetIconId(item.Icon), item.Name, pendingIntent);
                 }
+        }
+
+        private DateTime GetNextWeekday(DateTime start, DayOfWeek day, int? interval)
+        {
+            int daysToAdd = ((int)day - (int)start.DayOfWeek + 7) % (7 * interval != null && interval <= 0 ? 1 : (int)interval);
+            return start.AddDays(daysToAdd);
         }
 
         public string Notify(string title, string message, string notificationId = null, NotificationOptions options = null)
@@ -120,7 +132,7 @@ namespace Plugin.Xamarin.Alarmer
             PendingIntent pendingMainIntent = PendingIntent.GetBroadcast(Essential.Platform.CurrentActivity, 12345, mainIntent, PendingIntentFlags.OneShot);
             builder.SetContentIntent(pendingMainIntent);
 
-            global::Android.Net.Uri alert = GetAlarm(options);
+            global::Android.Net.Uri alert = GetAlarmSound(options);
             AddButtons(ref builder, notificationId, options?.CustomActions);
 
             int _smallIcon = string.IsNullOrEmpty(options?.SmallIcon) ? Essential.Platform.AppContext.ApplicationInfo.Icon : GetIconId(options.SmallIcon);
@@ -158,65 +170,98 @@ namespace Plugin.Xamarin.Alarmer
             return notificationId;
         }
 
-        public string Schedule(string title, string message, DateTime StartTime, Enums.AlarmSequence alarmSequence, int interval, NotificationOptions options)
+        public string Schedule(string title, string message, DateTime startTime, AlarmOptions alarmOptions, NotificationOptions options)
         {
             string notificationId = Guid.NewGuid().ToString();
 
-            var alarmIntent = CreateAlarmIntent(title, message, notificationId, options);
+            if (alarmOptions.AlarmSequence != Enums.AlarmSequence.OneTime)
+                AlarmCounter++;
+
+            DateTime nextTime = CalculateNextTime(startTime, alarmOptions);
+
+            var alarmIntent = CreateAlarmIntent(title, message, nextTime, alarmOptions, notificationId, options);
             var pendingIntent = PendingIntent.GetBroadcast(AndroidApp.Application.Context, 1, alarmIntent, PendingIntentFlags.UpdateCurrent);
 
-            DateTime _jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-
-            long repeatForMinute = 60000; // In milliseconds  
-            long repeatForHour = AlarmManager.IntervalHour; // In milliseconds  
-            long repeatForDay = AlarmManager.IntervalDay; // In milliseconds  
-            long repeatForWeek = 604800000; // In milliseconds  
-
-
-            long totalMilliSeconds = (long)(StartTime.ToUniversalTime() - _jan1st1970).TotalMilliseconds;
-            long intervalMilis = 0;
-            if (totalMilliSeconds < JavaSystem.CurrentTimeMillis())
-            {
-                switch (alarmSequence)
-                {
-                    case Enums.AlarmSequence.Minute:
-                        totalMilliSeconds = totalMilliSeconds + repeatForMinute;
-                        intervalMilis = repeatForMinute;
-                        break;
-                    case Enums.AlarmSequence.Hourly:
-                        totalMilliSeconds = totalMilliSeconds + repeatForHour;
-                        intervalMilis = repeatForHour;
-                        break;
-                    case Enums.AlarmSequence.Daily:
-                        totalMilliSeconds = totalMilliSeconds + repeatForDay;
-                        intervalMilis = repeatForDay;
-                        break;
-                    case Enums.AlarmSequence.Weekly:
-                        totalMilliSeconds = totalMilliSeconds + repeatForWeek;
-                        intervalMilis = repeatForWeek;
-                        break;
-                    case Enums.AlarmSequence.Monthly:
-                        intervalMilis = repeatForWeek;
-                        break;
-                    case Enums.AlarmSequence.Yearly:
-                        break;
-
-                    default:
-                        totalMilliSeconds = totalMilliSeconds + repeatForDay;
-                        break;
-                }
-            }
-
-            var alarmManager = AndroidApp.Application.Context.GetSystemService(Context.AlarmService) as AlarmManager;
-            if (alarmSequence == Enums.AlarmSequence.OneTime)
-                alarmManager?.Set(AlarmType.RtcWakeup, totalMilliSeconds, pendingIntent);
-            else
-                alarmManager?.SetRepeating(AlarmType.RtcWakeup, totalMilliSeconds, intervalMilis, pendingIntent);
+            SetAlarmManager(nextTime, pendingIntent);
 
             return notificationId;
         }
 
-        public void ReceiveSelectedNotification(string title, string message,string notificationId, string selectedAction)
+        private void SetAlarmManager(DateTime alarmTime, PendingIntent pendingIntent)
+        {
+            var alarmManager = AndroidApp.Application.Context.GetSystemService(Context.AlarmService) as AlarmManager;
+
+            long totalMilliSeconds = new DateTimeOffset(alarmTime).ToUnixTimeSeconds() * 1000;
+
+            alarmManager?.SetExactAndAllowWhileIdle(AlarmType.RtcWakeup, totalMilliSeconds, pendingIntent);
+        }
+
+        private DateTime CalculateNextTime(DateTime startTime, AlarmOptions alarmOptions)
+        {
+            DateTime calculatedDate = startTime;
+            int selectedInterval = alarmOptions.Interval <= 0 ? 1 : alarmOptions.Interval;
+
+            if (startTime < DateTime.Now)
+            {
+                switch (alarmOptions.AlarmSequence)
+                {
+                    case Enums.AlarmSequence.Minute:
+                        return startTime.AddMinutes(selectedInterval);
+                    case Enums.AlarmSequence.Hourly:
+                        return startTime.AddHours(selectedInterval);
+                    case Enums.AlarmSequence.Daily:
+                        calculatedDate = GetNextTime(startTime, alarmOptions);
+                        return calculatedDate > DateTime.Now ? calculatedDate : startTime.AddDays(selectedInterval);
+                    case Enums.AlarmSequence.Weekly:
+                        calculatedDate = GetNextTime(startTime, alarmOptions);
+                        if (calculatedDate > DateTime.Now)
+                            return calculatedDate;
+
+                        List<DateTime> days = null;
+
+                        if (alarmOptions?.DayOfWeeks != null)
+                        {
+                            var dayList = alarmOptions?.DayOfWeeks.Split('|');
+                            foreach (var dayitem in dayList)
+                            {
+                                DayOfWeek val;
+                                Enum.TryParse<DayOfWeek>(dayitem, out val);
+                                days.Add(GetNextWeekday(startTime, val, selectedInterval));
+                            }
+                            calculatedDate = days.OrderBy(o => o).FirstOrDefault(w => DateTime.Now > w);
+                            if (calculatedDate > DateTime.Now)
+                                return calculatedDate;
+                        }
+
+                        calculatedDate = GetNextWeekday(startTime, startTime.DayOfWeek, alarmOptions?.Interval);
+                        return calculatedDate;
+                    case Enums.AlarmSequence.Monthly:
+                        return startTime.AddMonths(selectedInterval);
+                    case Enums.AlarmSequence.Yearly:
+                        return startTime.AddYears(selectedInterval);
+                    default:
+                        return calculatedDate;
+                }
+
+            }
+
+            return startTime;
+        }
+
+        private DateTime GetNextTime(DateTime startTime, AlarmOptions alarmOptions)
+        {
+            if (alarmOptions?.AdditionalTimes != null)
+            {
+                var nxt = alarmOptions.AdditionalTimes.OrderBy(o => o).First(w => DateTime.Now < new DateTime(startTime.Year, startTime.Month, startTime.Day, w.Hours, w.Minutes, w.Seconds));
+                if (nxt != null)
+                    return new DateTime(startTime.Year, startTime.Month, startTime.Day, nxt.Hours, nxt.Minutes, nxt.Seconds);
+            }
+
+            return startTime;
+        }
+
+
+        public void ReceiveSelectedNotification(string title, string message, string notificationId, string selectedAction)
         {
             var args = new LocalNotificationEventArgs()
             {

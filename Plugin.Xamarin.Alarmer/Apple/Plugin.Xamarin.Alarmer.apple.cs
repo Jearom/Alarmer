@@ -12,6 +12,8 @@ namespace Plugin.Xamarin.Alarmer
     /// </summary>
     public class AlarmerImplementation : IAlarmer
     {
+        public int AlarmCounter => throw new NotImplementedException();
+
         public event EventHandler<LocalNotificationEventArgs> NotificationReceived;
         public event EventHandler<LocalNotificationEventArgs> NotificationSelectionReceived;
 
@@ -31,6 +33,11 @@ namespace Plugin.Xamarin.Alarmer
         }
 
         public string Schedule(string title, string message, DateTime StartTime, Enums.AlarmSequence alarmSequence, int interval, NotificationOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string Schedule(string title, string message, DateTime startTime, AlarmOptions alarmOptions, NotificationOptions options)
         {
             throw new NotImplementedException();
         }

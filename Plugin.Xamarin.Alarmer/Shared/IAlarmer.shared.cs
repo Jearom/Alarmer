@@ -7,9 +7,9 @@ namespace Plugin.Xamarin.Alarmer.Shared
     {
         public event EventHandler<LocalNotificationEventArgs> NotificationReceived;
         public event EventHandler<LocalNotificationEventArgs> NotificationSelectionReceived;
-
+        int AlarmCounter { get;  }
         string Notify(string title, string message, string notificationId = null, NotificationOptions options = null);
-        string Schedule(string title, string message, DateTime StartTime, Enums.AlarmSequence alarmSequence, int interval, NotificationOptions options);
+        string Schedule(string title, string message, DateTime startTime, AlarmOptions alarmOptions, NotificationOptions options);
         DateTime GetNextAlarm();
         void ReceiveSelectedNotification(string title, string message, string notificationId, string selectedAction);
     }

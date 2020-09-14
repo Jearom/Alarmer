@@ -113,16 +113,21 @@ namespace Alarmer.Sample.ViewModel
             {
 
 
-                alrm.Schedule("Test Title", "Test Message",dateTime, selectedSequence, Interval, new Plugin.Xamarin.Alarmer.Shared.Models.NotificationOptions
+                alrm.Schedule("Test Title", "Test Message", dateTime, new Plugin.Xamarin.Alarmer.Shared.Models.AlarmOptions
                 {
-                    EnableSound = true,
-                    EnableVibration = true,
-                    SmallIcon = "ic_alarm",
-                    CustomActions = new Plugin.Xamarin.Alarmer.Shared.Models.CustomAction[] { new Plugin.Xamarin.Alarmer.Shared.Models.CustomAction {
+                    AlarmSequence = Enums.AlarmSequence.OneTime,
+                    Interval = 1
+                },
+                    new Plugin.Xamarin.Alarmer.Shared.Models.NotificationOptions
+                    {
+                        EnableSound = true,
+                        EnableVibration = true,
+                        SmallIcon = "ic_alarm",
+                        CustomActions = new Plugin.Xamarin.Alarmer.Shared.Models.CustomAction[] { new Plugin.Xamarin.Alarmer.Shared.Models.CustomAction {
                     Icon = "ic_alarm",
                     Name = "Snooze"
                     } }
-                });
+                    });
 
             }
             catch (Exception e)

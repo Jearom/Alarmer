@@ -8,7 +8,7 @@
     <StackLayout>
         <StackLayout Orientation="Horizontal">
             <DatePicker Date="{Binding SelectedDate}" />
-            <TimePicker Time="{Binding SelectedTime}"/>
+            <TimePicker Time="{Binding SelectedTime}" Format="HH:mm" />
         </StackLayout>
         <Picker SelectedItem="{Binding SelectedSequnce}" ItemsSource="{Binding Sequences}">
         </Picker>
