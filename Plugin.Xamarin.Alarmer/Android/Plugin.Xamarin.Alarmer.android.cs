@@ -4,6 +4,7 @@ using Android.Graphics;
 using Android.Media;
 using Android.OS;
 using Android.Support.V4.App;
+using Android.Util;
 using Newtonsoft.Json;
 using Plugin.Xamarin.Alarmer;
 using Plugin.Xamarin.Alarmer.Android.Receivers;
@@ -13,6 +14,7 @@ using Plugin.Xamarin.Alarmer.Shared.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 using AndroidApp = Android.App;
 using Essential = Xamarin.Essentials;
@@ -42,6 +44,7 @@ namespace Plugin.Xamarin.Alarmer
             intent.PutExtra(Consts.NotificationIdKey, notificationId);
             intent.PutExtra(Consts.TitleKey, title);
             intent.PutExtra(Consts.MessageKey, message);
+            intent.PutExtra(Consts.AlarmCounterKey, AlarmCounter);
             intent.PutExtra(Consts.StartDateKey, JsonConvert.SerializeObject(startTime));
             if (alarmOptions != null)
                 intent.PutExtra(Consts.AlarmOptionsKey, JsonConvert.SerializeObject(alarmOptions));
@@ -81,33 +84,72 @@ namespace Plugin.Xamarin.Alarmer
 
         private global::Android.Net.Uri GetAlarmSound(NotificationOptions options)
         {
+            Log.Debug("Alarm", "AlarmNotificationReceiver GetAlarmSound start : " + DateTime.Now.ToString());
             global::Android.Net.Uri alert = null;
             if (options != null && options.EnableSound)
             {
                 alert = RingtoneManager.GetDefaultUri(RingtoneType.Alarm);
                 if (alert == null)
                     alert = RingtoneManager.GetDefaultUri(RingtoneType.Ringtone);
+
+                Log.Debug("Alarm", "AlarmNotificationReceiver GetAlarmSound alert3 : " + alert?.ToString());
             }
+
+            Log.Debug("Alarm", "AlarmNotificationReceiver GetAlarmSound alert ready: " + alert?.ToString());
             return alert;
         }
 
         private int GetIconId(string name)
         {
-            return Essential.Platform.CurrentActivity.Resources.GetIdentifier(name, "drawable", Essential.AppInfo.PackageName);
+            Log.Debug("Alarm", "AlarmNotificationReceiver Icon: " + name.ToString());
+            Log.Debug("Alarm", "AlarmNotificationReceiver packagename: " + Essential.AppInfo.PackageName.ToString());
+            try
+            {
+                return AndroidApp.Application.Context.Resources.GetIdentifier(name, "drawable", Essential.AppInfo.PackageName);
+            }
+            catch (Exception ex)
+            {
+                var messages = new List<string>();
+                do
+                {
+                    messages.Add(ex.Message);
+                    ex = ex.InnerException;
+                }
+                while (ex != null);
+                var errmessage = string.Join(" - ", messages);
+
+                Log.Error("Alarm", "AlarmNotificationReceiver Icon Error: " + errmessage);
+                throw;
+            }
+
         }
 
-        private void AddButtons(ref NotificationCompat.Builder builder, string notificationId, CustomAction[] actions)
+        private PendingIntent GetButton(string notificationId, CustomAction action)
         {
-            if (actions != null)
-                foreach (var item in actions)
-                {
-                    Intent intent = new Intent(Essential.Platform.CurrentActivity, typeof(NotificationSelectionReceiver));
-                    intent.SetAction(item.Name);
-                    intent.PutExtra(Consts.NotificationIdKey, notificationId);
-                    intent.PutExtra(Consts.AlarmCounterKey, AlarmCounter);
-                    PendingIntent pendingIntent = PendingIntent.GetBroadcast(Essential.Platform.CurrentActivity, 12345, intent, PendingIntentFlags.UpdateCurrent);
-                    builder.AddAction(GetIconId(item.Icon), item.Name, pendingIntent);
-                }
+            Log.Debug("Alarm", "AlarmNotificationReceiver AddButtons Count : " + action.ToString());
+
+            Intent intent = new Intent(AndroidApp.Application.Context, typeof(NotificationSelectionReceiver));
+
+            intent.SetAction(action.Name);
+            intent.PutExtra(Consts.NotificationIdKey, notificationId);
+            intent.PutExtra(Consts.AlarmCounterKey, AlarmCounter);
+
+
+            Log.Debug("Alarm", "AlarmNotificationReceiver AddButtons intent created: " + intent.ToString());
+
+            var pending = AndroidApp.TaskStackBuilder
+                  .Create(AndroidApp.Application.Context)
+                  .AddNextIntent(intent)
+                  .GetPendingIntent(messageId, PendingIntentFlags.UpdateCurrent);
+
+            Log.Debug("Alarm", "AlarmNotificationReceiver AddButtons pendingIntent created: " + pending.ToString());
+
+            //PendingIntent pendingIntent = PendingIntent.GetBroadcast(Essential.Platform.CurrentActivity, 12345, intent, PendingIntentFlags.UpdateCurrent);
+
+            Log.Debug("Alarm", "AlarmNotificationReceiver AddButtons finished: " + DateTime.Now.ToString());
+
+            return pending;
+
         }
 
         private DateTime GetNextWeekday(DateTime start, DayOfWeek day, int? interval)
@@ -116,9 +158,12 @@ namespace Plugin.Xamarin.Alarmer
             return start.AddDays(daysToAdd);
         }
 
+
         public string Notify(string title, string message, string notificationId = null, NotificationOptions options = null)
         {
             messageId++;
+
+            Log.Debug("Alarm", "AlarmNotificationReceiver Notify MessageId: " + messageId.ToString());
 
             if (string.IsNullOrEmpty(notificationId))
                 notificationId = Guid.NewGuid().ToString();
@@ -128,60 +173,88 @@ namespace Plugin.Xamarin.Alarmer
                .SetContentText(message);
             builder.SetCategory(Notification.CategoryAlarm);
 
-            Intent mainIntent = new Intent(AndroidApp.Application.Context, typeof(AndroidApp.Activity));
-            PendingIntent pendingMainIntent = PendingIntent.GetBroadcast(Essential.Platform.CurrentActivity, 12345, mainIntent, PendingIntentFlags.OneShot);
-            builder.SetContentIntent(pendingMainIntent);
+            Intent mainIntent = AndroidApp.Application.Context.PackageManager.GetLaunchIntentForPackage(AndroidApp.Application.Context.PackageName);
 
-            global::Android.Net.Uri alert = GetAlarmSound(options);
-            AddButtons(ref builder, notificationId, options?.CustomActions);
-
-            int _smallIcon = string.IsNullOrEmpty(options?.SmallIcon) ? Essential.Platform.AppContext.ApplicationInfo.Icon : GetIconId(options.SmallIcon);
-            int _largeIcon = string.IsNullOrEmpty(options?.LargeIcon) ? 0 : GetIconId(options.LargeIcon);
-
-            Console.WriteLine("small icon : " + _smallIcon);
-            Console.WriteLine("large icon : " + _largeIcon);
-
-            if (_smallIcon != 0)
-                builder.SetSmallIcon(_smallIcon);
-            if (_largeIcon != 0)
-                builder.SetLargeIcon(BitmapFactory.DecodeResource(AndroidApp.Application.Context.Resources, _largeIcon));
-            if (Build.VERSION.SdkInt < BuildVersionCodes.O)
+            //PendingIntent pendingMainIntent = PendingIntent.GetBroadcast(Essential.Platform.CurrentActivity, 12345, mainIntent, PendingIntentFlags.OneShot);
+            builder.SetContentIntent(AndroidApp.TaskStackBuilder
+                        .Create(AndroidApp.Application.Context)
+                        .AddNextIntent(mainIntent)
+                        .GetPendingIntent(messageId, PendingIntentFlags.OneShot)
+                        );
+            try
             {
-#pragma warning disable CS0618 // Type or member is obsolete
-                builder.SetSound(alert)
-                    .SetVibrate(new long[] { 1000, 1000, 1000 });
-#pragma warning restore CS0618 // Type or member is obsolete
+                if (options.CustomActions != null)
+                    foreach (var item in options.CustomActions)
+                    {
+                        Log.Debug("Alarm", "AlarmNotificationReceiver Action item : " + item.Name.ToString() + " notificationId : " + notificationId);
+                        builder.AddAction(GetIconId(item.Icon), item.Name, GetButton(notificationId, item));
+                    }
+
+                Log.Debug("Alarm", "AlarmNotificationReceiver ButtonsAdded : " + DateTime.Now.ToString());
+                int _smallIcon = string.IsNullOrEmpty(options?.SmallIcon) ? Essential.Platform.AppContext.ApplicationInfo.Icon : GetIconId(options.SmallIcon);
+                int _largeIcon = string.IsNullOrEmpty(options?.LargeIcon) ? 0 : GetIconId(options.LargeIcon);
+
+                Console.WriteLine("small icon : " + _smallIcon);
+                Console.WriteLine("large icon : " + _largeIcon);
+
+                if (_smallIcon != 0)
+                    builder.SetSmallIcon(_smallIcon);
+                if (_largeIcon != 0)
+                    builder.SetLargeIcon(BitmapFactory.DecodeResource(AndroidApp.Application.Context.Resources, _largeIcon));
+
+                if (options.EnableSound)
+                    builder.SetSound(GetAlarmSound(options));
+                if (options.EnableVibration)
+                    builder.SetVibrate(new long[] { 1000, 1000, 1000 });
+
+
+                CreateNotificationChannel(GetAlarmSound(options), options != null && options.EnableVibration);
+                Notification notification = builder.Build();
+
+                manager.Notify(messageId, notification);
+
+                var args = new LocalNotificationEventArgs()
+                {
+                    Id = notificationId,
+                    Title = title,
+                    Message = message,
+
+                };
+
+                NotificationReceived?.Invoke(null, args);
+
             }
-
-            CreateNotificationChannel(alert, options != null && options.EnableVibration);
-            Notification notification = builder.Build();
-            manager.Notify(messageId, notification);
-
-            var args = new LocalNotificationEventArgs()
+            catch (Exception ex)
             {
-                Id = notificationId,
-                Title = title,
-                Message = message,
+                Log.Error("Alarm", "AlarmNotificationReceiver Notify : " + ex.Message);
+                Log.Error("Alarm", "AlarmNotificationReceiver Notify : " + ex.StackTrace);
+                var messages = new List<string>();
+                do
+                {
+                    messages.Add(ex.Message);
+                    ex = ex.InnerException;
+                }
+                while (ex != null);
+                var errmessage = string.Join(" - ", messages);
 
-            };
-
-            NotificationReceived?.Invoke(null, args);
+                Log.Error("Alarm", "AlarmNotificationReceiver Notify : " + errmessage);
+            }
 
             return notificationId;
         }
 
-        public string Schedule(string title, string message, DateTime startTime, AlarmOptions alarmOptions, NotificationOptions options)
+        public Task<string> Schedule(string title, string message, DateTime startTime, AlarmOptions alarmOptions, NotificationOptions options)
         {
             string notificationId = Guid.NewGuid().ToString();
 
             if (alarmOptions.AlarmSequence != Enums.AlarmSequence.OneTime)
                 AlarmCounter++;
 
-            if (alarmOptions?.TotalAlarmCount != null && AlarmCounter > alarmOptions.TotalAlarmCount)
-                return notificationId;
+            if (alarmOptions?.TotalAlarmCount != null && alarmOptions?.TotalAlarmCount > 0 && AlarmCounter > alarmOptions.TotalAlarmCount)
+                return Task.FromResult(notificationId);
 
             if (alarmOptions?.EndDate != null && alarmOptions.EndDate < DateTime.Now)
-                return notificationId;
+                return Task.FromResult(notificationId);
             DateTime nextTime = CalculateNextTime(startTime, alarmOptions);
 
             var alarmIntent = CreateAlarmIntent(title, message, nextTime, alarmOptions, notificationId, options);
@@ -189,7 +262,7 @@ namespace Plugin.Xamarin.Alarmer
 
             SetAlarmManager(nextTime, pendingIntent);
 
-            return notificationId;
+            return Task.FromResult(notificationId);
         }
 
         private void SetAlarmManager(DateTime alarmTime, PendingIntent pendingIntent)
@@ -229,8 +302,8 @@ namespace Plugin.Xamarin.Alarmer
                             var dayList = alarmOptions?.DayOfWeeks.Split('|');
                             foreach (var dayitem in dayList)
                             {
-                                DayOfWeek val;
-                                Enum.TryParse<DayOfWeek>(dayitem, out val);
+
+                                Enum.TryParse<DayOfWeek>(dayitem, out DayOfWeek val);
                                 days.Add(GetNextWeekday(startTime, val, selectedInterval));
                             }
                             calculatedDate = days.OrderBy(o => o).FirstOrDefault(w => DateTime.Now > w);
@@ -288,6 +361,12 @@ namespace Plugin.Xamarin.Alarmer
                 return new DateTime((long)triggerTime);
             else
                 return new DateTime();
+        }
+
+        public override string ToString()
+        {
+            return $"AlarmImplementation = ChannelName : {channelName} - ChannelId : {channelId}";
+
         }
     }
 }

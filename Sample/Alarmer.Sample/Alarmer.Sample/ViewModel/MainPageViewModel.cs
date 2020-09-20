@@ -26,7 +26,7 @@ namespace Alarmer.Sample.ViewModel
         }
 
         private TimeSpan selectedTime = DateTime.Now.TimeOfDay;
-        IAlarmer alrm;
+        readonly IAlarmer alrm;
         public MainPageViewModel()
         {
             alrm = DependencyService.Get<IAlarmer>();
@@ -49,7 +49,11 @@ namespace Alarmer.Sample.ViewModel
         public TimeSpan SelectedEndTime
         {
             get { return selectedEndTime; }
-            set { selectedEndTime = value; }
+            set
+            {
+                selectedEndTime = value;
+                OnPropertyChanged();
+            }
         }
 
 
@@ -58,7 +62,11 @@ namespace Alarmer.Sample.ViewModel
         public DateTime EndDate
         {
             get { return endDate; }
-            set { endDate = value; }
+            set
+            {
+                endDate = value;
+                OnPropertyChanged();
+            }
         }
 
         private bool isEndDate;
@@ -66,7 +74,11 @@ namespace Alarmer.Sample.ViewModel
         public bool IsEndDate
         {
             get { return isEndDate; }
-            set { isEndDate = value; }
+            set
+            {
+                isEndDate = value;
+                OnPropertyChanged();
+            }
         }
 
 
@@ -86,32 +98,49 @@ namespace Alarmer.Sample.ViewModel
         public List<EnumModel> Sequences
         {
             get { return sequences; }
-            set { sequences = value; }
+            set
+            {
+                sequences = value;
+                OnPropertyChanged();
+            }
         }
 
-        private Enums.AlarmSequence selectedSequence;
+        private EnumModel selectedSequence;
 
-        public Enums.AlarmSequence SelectedSequnce
+        public EnumModel SelectedSequnce
         {
             get { return selectedSequence; }
-            set { selectedSequence = value; }
+            set
+            {
+                selectedSequence = value;
+                OnPropertyChanged();
+            }
         }
 
 
-        private int interval;
+        private int interval = 1;
 
         public int Interval
         {
             get { return interval; }
-            set { interval = value; }
+            set
+            {
+                interval = value;
+                OnPropertyChanged();
+            }
         }
 
-        private int maxCount = 0;
+        private int? maxCount = null;
 
-        public int MaxCount
+        public int? MaxCount
         {
             get { return maxCount; }
-            set { maxCount = value; }
+            set
+            {
+                maxCount = value;
+
+                OnPropertyChanged();
+            }
         }
 
 
@@ -153,8 +182,8 @@ namespace Alarmer.Sample.ViewModel
 
                 alrm.Schedule("Test Title", "Test Message", dateTime, new Plugin.Xamarin.Alarmer.Shared.Models.AlarmOptions
                 {
-                    AlarmSequence = Enums.AlarmSequence.OneTime,
-                    Interval = 1,
+                    AlarmSequence = (Enums.AlarmSequence)SelectedSequnce.Value,
+                    Interval = Interval,
                     EndDate = _endDate,
                     TotalAlarmCount = MaxCount
                 },

@@ -2,6 +2,7 @@
 using Plugin.Xamarin.Alarmer.Shared;
 using Plugin.Xamarin.Alarmer.Shared.Models;
 using System;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 
 [assembly: Dependency(typeof(AlarmerImplementation))]
@@ -32,12 +33,9 @@ namespace Plugin.Xamarin.Alarmer
             throw new NotImplementedException();
         }
 
-        public string Schedule(string title, string message, DateTime StartTime, Enums.AlarmSequence alarmSequence, int interval, NotificationOptions options)
-        {
-            throw new NotImplementedException();
-        }
+   
 
-        public string Schedule(string title, string message, DateTime startTime, AlarmOptions alarmOptions, NotificationOptions options)
+        public Task<string> Schedule(string title, string message, DateTime startTime, AlarmOptions alarmOptions, NotificationOptions options)
         {
             throw new NotImplementedException();
         }

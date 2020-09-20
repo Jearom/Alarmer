@@ -131,6 +131,10 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Plugin.Xamarin.Alarmer\Plugin.Xamarin.Alarmer.csproj">
+      <Project>{e76d0165-0c9a-4c69-b556-7c12e7fe0431}</Project>
+      <Name>Plugin.Xamarin.Alarmer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Alarmer.Sample\Alarmer.Sample.csproj">
       <Project>{2B2EA1C5-018F-46C5-8B08-2013BC02DB66}</Project>
       <Name>Alarmer.Sample</Name>
