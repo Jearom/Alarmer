@@ -146,7 +146,6 @@ namespace Alarmer.Sample.ViewModel
 
         public ICommand StartAlarm => new Command(() =>
         {
-
             try
             {
 

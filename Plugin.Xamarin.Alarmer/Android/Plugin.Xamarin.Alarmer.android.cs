@@ -10,6 +10,7 @@ using Plugin.Xamarin.Alarmer;
 using Plugin.Xamarin.Alarmer.Android.Receivers;
 using Plugin.Xamarin.Alarmer.Shared;
 using Plugin.Xamarin.Alarmer.Shared.Constants;
+using Plugin.Xamarin.Alarmer.Shared.Extensions;
 using Plugin.Xamarin.Alarmer.Shared.Models;
 using System;
 using System.Collections.Generic;
@@ -144,8 +145,6 @@ namespace Plugin.Xamarin.Alarmer
 
             Log.Debug("Alarm", "AlarmNotificationReceiver AddButtons pendingIntent created: " + pending.ToString());
 
-            //PendingIntent pendingIntent = PendingIntent.GetBroadcast(Essential.Platform.CurrentActivity, 12345, intent, PendingIntentFlags.UpdateCurrent);
-
             Log.Debug("Alarm", "AlarmNotificationReceiver AddButtons finished: " + DateTime.Now.ToString());
 
             return pending;
@@ -157,7 +156,6 @@ namespace Plugin.Xamarin.Alarmer
             int daysToAdd = ((int)day - (int)start.DayOfWeek + 7) % (7 * interval != null && interval <= 0 ? 1 : (int)interval);
             return start.AddDays(daysToAdd);
         }
-
 
         public string Notify(string title, string message, string notificationId = null, NotificationOptions options = null)
         {
@@ -174,13 +172,11 @@ namespace Plugin.Xamarin.Alarmer
             builder.SetCategory(Notification.CategoryAlarm);
 
             Intent mainIntent = AndroidApp.Application.Context.PackageManager.GetLaunchIntentForPackage(AndroidApp.Application.Context.PackageName);
-
-            //PendingIntent pendingMainIntent = PendingIntent.GetBroadcast(Essential.Platform.CurrentActivity, 12345, mainIntent, PendingIntentFlags.OneShot);
             builder.SetContentIntent(AndroidApp.TaskStackBuilder
-                        .Create(AndroidApp.Application.Context)
-                        .AddNextIntent(mainIntent)
-                        .GetPendingIntent(messageId, PendingIntentFlags.OneShot)
-                        );
+                                    .Create(AndroidApp.Application.Context)
+                                    .AddNextIntent(mainIntent)
+                                    .GetPendingIntent(messageId, PendingIntentFlags.OneShot)
+                                    );
             try
             {
                 if (options.CustomActions != null)
@@ -297,14 +293,12 @@ namespace Plugin.Xamarin.Alarmer
 
                         List<DateTime> days = null;
 
-                        if (alarmOptions?.DayOfWeeks != null)
+                        if (alarmOptions?.DaysOfWeek != Enums.DaysOfWeek.None)
                         {
-                            var dayList = alarmOptions?.DayOfWeeks.Split('|');
-                            foreach (var dayitem in dayList)
+                            var dayList = alarmOptions?.DaysOfWeek.GetUniqueFlags();
+                            foreach (DayOfWeek dayitem in dayList)
                             {
-
-                                Enum.TryParse<DayOfWeek>(dayitem, out DayOfWeek val);
-                                days.Add(GetNextWeekday(startTime, val, selectedInterval));
+                                days.Add(GetNextWeekday(startTime, dayitem, selectedInterval));
                             }
                             calculatedDate = days.OrderBy(o => o).FirstOrDefault(w => DateTime.Now > w);
                             if (calculatedDate > DateTime.Now)
@@ -337,7 +331,6 @@ namespace Plugin.Xamarin.Alarmer
 
             return startTime;
         }
-
 
         public void ReceiveSelectedNotification(string title, string message, string notificationId, string selectedAction)
         {
