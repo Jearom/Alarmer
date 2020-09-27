@@ -26,12 +26,12 @@ namespace Alarmer.Sample.ViewModel
         }
 
         private TimeSpan selectedTime = DateTime.Now.TimeOfDay;
-        readonly IAlarmer alrm;
+        readonly IAlarmer _alarmer;
         public MainPageViewModel()
         {
-            alrm = DependencyService.Get<IAlarmer>();
-            alrm.NotificationReceived += notificationreceived;
-            alrm.NotificationSelectionReceived += notificationSelectionReceived;
+            _alarmer = DependencyService.Get<IAlarmer>();
+            _alarmer.NotificationReceived += Notificationreceived;
+            _alarmer.NotificationSelectionReceived += NotificationSelectionReceived;
         }
 
         public TimeSpan SelectedTime
@@ -148,8 +148,7 @@ namespace Alarmer.Sample.ViewModel
         {
             try
             {
-
-                alrm.Notify("Test Title", "Test Message", Guid.NewGuid().ToString(), new Plugin.Xamarin.Alarmer.Shared.Models.NotificationOptions
+                _alarmer.Notify("Test Title", "Test Message", 1, new Plugin.Xamarin.Alarmer.Shared.Models.NotificationOptions
                 {
                     EnableSound = true,
                     EnableVibration = true,
@@ -179,7 +178,7 @@ namespace Alarmer.Sample.ViewModel
                 if (IsEndDate)
                     _endDate = new DateTime(EndDate.Year, EndDate.Month, EndDate.Day, SelectedEndTime.Hours, SelectedEndTime.Minutes, SelectedEndTime.Seconds);
 
-                alrm.Schedule("Test Title", "Test Message", dateTime, new Plugin.Xamarin.Alarmer.Shared.Models.AlarmOptions
+                _alarmer.Schedule("Test Title", "Test Message", dateTime, new Plugin.Xamarin.Alarmer.Shared.Models.AlarmOptions
                 {
                     AlarmSequence = (Enums.AlarmSequence)SelectedSequnce.Value,
                     Interval = Interval,
@@ -205,12 +204,12 @@ namespace Alarmer.Sample.ViewModel
 
         });
 
-        private void notificationSelectionReceived(object sender, EventArgs e)
+        private void NotificationSelectionReceived(object sender, EventArgs e)
         {
             var asd = e;
         }
 
-        private void notificationreceived(object sender, EventArgs e)
+        private void Notificationreceived(object sender, EventArgs e)
         {
             var asd = e;
         }

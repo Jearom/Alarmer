@@ -18,24 +18,32 @@ namespace Plugin.Xamarin.Alarmer
         public event EventHandler<LocalNotificationEventArgs> NotificationReceived;
         public event EventHandler<LocalNotificationEventArgs> NotificationSelectionReceived;
 
+        public void Cancel(int notificationId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void CancelAll()
+        {
+            throw new NotImplementedException();
+        }
+
         public DateTime GetNextAlarm()
         {
             throw new NotImplementedException();
         }
 
-        public string Notify(string title, string message, string notificationId = null, NotificationOptions options = null)
+        public int Notify(string title, string message, int notificationId, NotificationOptions options = null)
         {
             throw new NotImplementedException();
         }
 
-        public void ReceiveSelectedNotification(string title, string message, string notificationId, string selectedAction)
+        public void ReceiveSelectedNotification(string title, string message, int notificationId, string selectedAction)
         {
             throw new NotImplementedException();
         }
 
-   
-
-        public Task<string> Schedule(string title, string message, DateTime startTime, AlarmOptions alarmOptions, NotificationOptions options)
+        public Task<int> Schedule(string title, string message, DateTime startTime, AlarmOptions alarmOptions, NotificationOptions options)
         {
             throw new NotImplementedException();
         }

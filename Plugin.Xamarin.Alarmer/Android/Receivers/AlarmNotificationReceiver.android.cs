@@ -18,19 +18,17 @@ namespace Plugin.Xamarin.Alarmer.Android.Receivers
 
         public override void OnReceive(Context context, Intent intent)
         {
-            Console.WriteLine("AlarmNotificationReceiver Started : " + DateTime.Now.ToString());
             Log.Debug("Alarm", "AlarmNotificationReceiver Started : " + DateTime.Now.ToString());
-
 
             try
             {
-                var notificationId = intent.GetStringExtra(Consts.NotificationIdKey);
+                var notificationId = intent.GetIntExtra(Consts.NotificationIdKey,0);
 
                 var message = intent.GetStringExtra(Consts.MessageKey);
                 var title = intent.GetStringExtra(Consts.TitleKey);
                 int alarmRunCounter = intent.GetIntExtra(Consts.AlarmCounterKey, 0);
 
-                Log.Debug("Alarm", "AlarmNotificationReceiver Started : " + notificationId);
+                Log.Debug("Alarm", "AlarmNotificationReceiver Started : " + notificationId.ToString());
 
                 NotificationOptions options = JsonConvert.DeserializeObject<NotificationOptions>(intent.GetStringExtra(Consts.OptionsKey));
                 AlarmOptions alarmOptions = JsonConvert.DeserializeObject<AlarmOptions>(intent.GetStringExtra(Consts.AlarmOptionsKey));
@@ -41,7 +39,6 @@ namespace Plugin.Xamarin.Alarmer.Android.Receivers
                 if (alarmOptions?.AlarmSequence != Shared.Enums.AlarmSequence.OneTime)
                 {
 
-                    Log.Debug("Alarm", "AlarmNotificationReceiver AlarmSequence : " + alarmOptions?.AlarmSequence.ToString());
                     Log.Debug("Alarm", "AlarmNotificationReceiver alarmRunCounter : " + alarmRunCounter.ToString());
                     alarmer.AlarmCounter = alarmRunCounter;
                     Log.Debug("Alarm", "AlarmNotificationReceiver alarmRunCounter : " + alarmer.AlarmCounter.ToString());
@@ -49,8 +46,7 @@ namespace Plugin.Xamarin.Alarmer.Android.Receivers
                 }
 
                 Log.Debug("Alarm", "AlarmNotificationReceiver Started : " + options.ToString());
-                Log.Debug("Alarm", "AlarmNotificationReceiver TEst : " + options.ToString());
-                Log.Debug("Alarm", "AlarmNotificationReceiver notify : " + alarmer.ToString());
+              
                 alarmer.Notify(title, message, notificationId, options);
                 Log.Debug("Alarm", "AlarmNotificationReceiver finished : " + DateTime.Now.ToString());
             }

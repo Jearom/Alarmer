@@ -13,7 +13,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alarmer.Sample.Android", "S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alarmer.Sample.iOS", "Sample\Alarmer.Sample\Alarmer.Sample.iOS\Alarmer.Sample.iOS.csproj", "{0DF4DD15-8D81-4EF5-9CBB-968A6D0D4EAC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alarmer.Sample", "Sample\Alarmer.Sample\Alarmer.Sample\Alarmer.Sample.csproj", "{308CC3D9-F2BF-4D53-96DC-3635C4375837}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alarmer.Sample", "Sample\Alarmer.Sample\Alarmer.Sample\Alarmer.Sample.csproj", "{308CC3D9-F2BF-4D53-96DC-3635C4375837}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1CACBCB9-4C3F-4EF6-85BA-2C69E6F1A0CE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

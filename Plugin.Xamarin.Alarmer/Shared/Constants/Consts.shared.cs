@@ -12,6 +12,7 @@
         internal const string AlarmCounterKey = "AlarmCounterKey";
         internal const string IntervalKey = "IntervalKey";
         internal const string BadgeKey = "BadgeKey";
+        internal const string MessageIdListKey = "MessageIdListKey";
 
 
     }
