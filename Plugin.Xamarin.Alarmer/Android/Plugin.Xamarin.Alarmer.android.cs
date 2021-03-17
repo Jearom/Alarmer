@@ -272,7 +272,7 @@ namespace Plugin.Xamarin.Alarmer
             Essential.Preferences.Set(Consts.MessageIdListKey, res);
         }
 
-        private void RemoveAlarmId(int id)
+        public void RemoveAlarmId(int id)
         {
             List<int> list = GetAlarmIds();
             list.Remove(id);
@@ -284,6 +284,11 @@ namespace Plugin.Xamarin.Alarmer
             List<int> list = GetAlarmIds();
             list.Add(id);
             SaveAlarmIds(list);
+        }
+
+        public async Task ReSetAlarms()
+        {
+
         }
 
         private async Task SaveAlarm(string title, string message, DateTime startDate, AlarmOptions options, NotificationOptions notification)
@@ -327,7 +332,6 @@ namespace Plugin.Xamarin.Alarmer
             {
 
             }
-
         }
 
         public int Notify(string title, string message, int notificationId, NotificationOptions options = null)
@@ -409,8 +413,11 @@ namespace Plugin.Xamarin.Alarmer
 
             return notificationId;
         }
-
-        public async Task<int> Schedule(string title, string message, DateTime startTime, AlarmOptions alarmOptions, NotificationOptions options)
+        public Task<int> Schedule(string title, string message, DateTime startTime, AlarmOptions alarmOptions, NotificationOptions options)
+        {
+            return this.Schedule(title, message, startTime, alarmOptions, options, true);
+        }
+        private async Task<int> Schedule(string title, string message, DateTime startTime, AlarmOptions alarmOptions, NotificationOptions options, bool isNew = false)
         {
             var list = GetAlarmIds();
             int notificationId;
@@ -434,9 +441,12 @@ namespace Plugin.Xamarin.Alarmer
 
             SetAlarmManager(nextTime, pendingIntent);
 
-            SaveAlarmId(notificationId);
+            if (isNew)
+            {
+                SaveAlarmId(notificationId);
 
-            await SaveAlarm(title, message, startTime, alarmOptions, options);
+                await SaveAlarm(title, message, nextTime, alarmOptions, options);
+            }
 
             return notificationId;
         }

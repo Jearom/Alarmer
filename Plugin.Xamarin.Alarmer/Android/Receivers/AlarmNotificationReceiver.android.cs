@@ -1,4 +1,5 @@
-﻿using Android.Content;
+﻿using Android.App;
+using Android.Content;
 using Android.Util;
 using Newtonsoft.Json;
 using Plugin.Xamarin.Alarmer.Shared.Constants;
@@ -9,7 +10,8 @@ using System.Linq;
 
 namespace Plugin.Xamarin.Alarmer.Android.Receivers
 {
-    [BroadcastReceiver(Enabled = true, Exported = true)]
+    [BroadcastReceiver(Enabled = true, Exported = false)]
+    [IntentFilter(new[] { Intent.ActionBootCompleted })]
     public class AlarmNotificationReceiver : BroadcastReceiver
     {
         public AlarmNotificationReceiver()
