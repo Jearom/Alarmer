@@ -126,6 +126,9 @@
     <PackageReference Include="Plugin.Xamarin.Alarmer">
       <Version>1.0.0.2</Version>
     </PackageReference>
+    <PackageReference Include="UniCore.Mobile.Extension.SQLite">
+      <Version>1.0.7.5</Version>
+    </PackageReference>
     <PackageReference Include="Xamarin.Forms" Version="4.8.0.1364" />
     <PackageReference Include="Xamarin.Essentials" Version="1.5.3.2" />
   </ItemGroup>

@@ -14,6 +14,9 @@
         internal const string BadgeKey = "BadgeKey";
         internal const string MessageIdListKey = "MessageIdListKey";
 
+        #region Database
+        public const string DatabaseName = "Alarmer" + ".db3";
 
+        #endregion
     }
 }

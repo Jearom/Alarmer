@@ -10,8 +10,10 @@ using Plugin.Xamarin.Alarmer;
 using Plugin.Xamarin.Alarmer.Android.Receivers;
 using Plugin.Xamarin.Alarmer.Shared;
 using Plugin.Xamarin.Alarmer.Shared.Constants;
+using Plugin.Xamarin.Alarmer.Shared.Entities;
 using Plugin.Xamarin.Alarmer.Shared.Extensions;
 using Plugin.Xamarin.Alarmer.Shared.Models;
+using Plugin.Xamarin.Alarmer.Shared.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,6 +34,20 @@ namespace Plugin.Xamarin.Alarmer
         const string channelName = "AlarmChannel";
         readonly string channelId = "default";
         int messageId = -1;
+
+        AlarmRepository _alarmRepo;
+        AlarmOptionRepository _optionRepository;
+        TimingRepository _timingRepository;
+        CustomActionRepository _customActionRepository;
+
+
+        public AlarmerImplementation()
+        {
+            _alarmRepo = new AlarmRepository();
+            _optionRepository = new AlarmOptionRepository();
+            _timingRepository = new TimingRepository();
+        }
+
         public int AlarmCounter { get; internal set; }
 
         public event EventHandler<LocalNotificationEventArgs> NotificationReceived;
@@ -270,6 +286,50 @@ namespace Plugin.Xamarin.Alarmer
             SaveAlarmIds(list);
         }
 
+        private async Task SaveAlarm(string title, string message, DateTime startDate, AlarmOptions options, NotificationOptions notification)
+        {
+            try
+            {
+                var resp = await _alarmRepo.InsertAsync(new AlarmEntity { Message = message, StartDate = startDate, Title = title });
+                await _optionRepository.InsertAsync(new AlarmOptionEntity
+                {
+                    AlarmId = resp,
+                    AlarmSequence = options.AlarmSequence,
+                    DaysOfWeek = options.DaysOfWeek,
+                    EndDate = options.EndDate,
+                    Interval = options.Interval,
+                    TotalAlarmCount = options.TotalAlarmCount,
+                    EnableSound = notification.EnableSound,
+                    EnableVibration = notification.EnableVibration,
+                    SmallIcon = notification.SmallIcon,
+                    LargeIcon = notification.LargeIcon
+                });
+
+                foreach (var item in options.AdditionalTimes)
+                {
+                    await _timingRepository.InsertAsync(new TimingEntity
+                    {
+                        AlarmId = resp,
+                        Time = item
+                    });
+                }
+                foreach (var item in notification.CustomActions)
+                {
+                    await _customActionRepository.InsertAsync(new CustomActionEntity
+                    {
+                        AlarmId = resp,
+                        Icon = item.Icon,
+                        Name = item.Name
+                    });
+                }
+            }
+            catch (Exception)
+            {
+
+            }
+
+        }
+
         public int Notify(string title, string message, int notificationId, NotificationOptions options = null)
         {
             messageId++;
@@ -350,7 +410,7 @@ namespace Plugin.Xamarin.Alarmer
             return notificationId;
         }
 
-        public Task<int> Schedule(string title, string message, DateTime startTime, AlarmOptions alarmOptions, NotificationOptions options)
+        public async Task<int> Schedule(string title, string message, DateTime startTime, AlarmOptions alarmOptions, NotificationOptions options)
         {
             var list = GetAlarmIds();
             int notificationId;
@@ -363,10 +423,10 @@ namespace Plugin.Xamarin.Alarmer
                 AlarmCounter++;
 
             if (alarmOptions?.TotalAlarmCount != null && alarmOptions?.TotalAlarmCount > 0 && AlarmCounter > alarmOptions.TotalAlarmCount)
-                return Task.FromResult(notificationId);
+                return notificationId;
 
             if (alarmOptions?.EndDate != null && alarmOptions.EndDate < DateTime.Now)
-                return Task.FromResult(notificationId);
+                return notificationId;
             DateTime nextTime = CalculateNextTime(startTime, alarmOptions);
             Log.Debug("Alarm", "AlarmNotificationReceiver Schedule : " + AndroidApp.Application.Context.ToString());
             var alarmIntent = CreateAlarmIntent(title, message, nextTime, alarmOptions, notificationId, options);
@@ -376,7 +436,9 @@ namespace Plugin.Xamarin.Alarmer
 
             SaveAlarmId(notificationId);
 
-            return Task.FromResult(notificationId);
+            await SaveAlarm(title, message, startTime, alarmOptions, options);
+
+            return notificationId;
         }
 
         public void ReceiveSelectedNotification(string title, string message, int notificationId, string selectedAction)

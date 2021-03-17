@@ -2,6 +2,7 @@
 {
     public class NotificationOptions
     {
+
         public bool EnableSound { get; set; }
         public bool EnableVibration { get; set; }
         public string SmallIcon { get; set; }
