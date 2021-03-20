@@ -43,7 +43,8 @@ namespace Plugin.Xamarin.Alarmer
             throw new NotImplementedException();
         }
 
-        public Task<int> Schedule(string title, string message, DateTime startTime, AlarmOptions alarmOptions, NotificationOptions options)
+
+        public Task<int> Schedule(int? id, string title, string message, DateTime startTime, AlarmOptions alarmOptions, NotificationOptions options)
         {
             throw new NotImplementedException();
         }

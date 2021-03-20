@@ -3,10 +3,10 @@
 	<PropertyGroup>
 		<!--Work around so the conditions work below-->
 		<TargetFrameworks></TargetFrameworks>
-		<TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">netstandard2.0;Xamarin.iOS10;MonoAndroid90</TargetFrameworks>
-		<TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard2.0;Xamarin.iOS10;MonoAndroid90</TargetFrameworks>
+		<TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">netstandard2.1;Xamarin.iOS10;MonoAndroid90</TargetFrameworks>
+		<TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard2.1;Xamarin.iOS10;MonoAndroid90</TargetFrameworks>
 		<!--Feel free to add as many targets as you need below
-    netstandard1.0;netstandard2.0;MonoAndroid90;Xamarin.iOS10;Xamarin.TVOS10;Xamarin.WatchOS10;Xamarin.Mac20;Tizen40
+    netstandard1.0;netstandard2.1;MonoAndroid90;Xamarin.iOS10;Xamarin.TVOS10;Xamarin.WatchOS10;Xamarin.Mac20;Tizen40
     For UWP update the version number with a version number you have installed.
     -->
 		<AssemblyName>Plugin.Xamarin.Alarmer</AssemblyName>
@@ -14,10 +14,10 @@
 		<PackageId>Plugin.Xamarin.Alarmer</PackageId>
 
 		<Product>$(AssemblyName) ($(TargetFramework))</Product>
-		<AssemblyVersion>1.0.1.4</AssemblyVersion>
-		<AssemblyFileVersion>1.0.0.0</AssemblyFileVersion>
-		<Version>1.0.1.4</Version>
-		<PackageVersion>1.0.0.4</PackageVersion>
+		<AssemblyVersion>1.0.1.7</AssemblyVersion>
+		<AssemblyFileVersion>1.0.1.7</AssemblyFileVersion>
+		<Version>1.0.1.7</Version>
+		<PackageVersion>1.0.1.7</PackageVersion>
 		<PackOnBuild>true</PackOnBuild>
 		<NeutralLanguage>en</NeutralLanguage>
 		<LangVersion>default</LangVersion>
@@ -70,7 +70,7 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" Version="1.0.0" PrivateAssets="All"/>
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Include="**\*.shared.cs" />
@@ -89,11 +89,14 @@
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'MonoAndroid90'">
 		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+		<PackageReference Include="Xamarin.Android.Arch.Work.Runtime">
+		  <Version>1.0.0.3</Version>
+		</PackageReference>
 	</ItemGroup>
 
 	<ItemGroup>
 
-		<PackageReference Include="UniCore.Mobile.Extension.SQLite" Version="1.0.7.5" />
+		<PackageReference Include="UniCore.Mobile.Extension.SQLite" Version="1.0.9.3" />
 
 		<PackageReference Include="Xamarin.Essentials" Version="1.5.3.2" />
 		<PackageReference Include="Xamarin.Forms" Version="4.8.0.1364" />

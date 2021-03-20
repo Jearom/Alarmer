@@ -5,6 +5,7 @@ using Android.Media;
 using Android.OS;
 using Android.Support.V4.App;
 using Android.Util;
+using AndroidX.Work;
 using Newtonsoft.Json;
 using Plugin.Xamarin.Alarmer;
 using Plugin.Xamarin.Alarmer.Android.Receivers;
@@ -39,13 +40,15 @@ namespace Plugin.Xamarin.Alarmer
         AlarmOptionRepository _optionRepository;
         TimingRepository _timingRepository;
         CustomActionRepository _customActionRepository;
-
+        NotificationOptionRepository _notificationOptionRepository;
 
         public AlarmerImplementation()
         {
             _alarmRepo = new AlarmRepository();
             _optionRepository = new AlarmOptionRepository();
             _timingRepository = new TimingRepository();
+            _customActionRepository = new CustomActionRepository();
+            _notificationOptionRepository = new NotificationOptionRepository();
         }
 
         public int AlarmCounter { get; internal set; }
@@ -291,46 +294,54 @@ namespace Plugin.Xamarin.Alarmer
 
         }
 
-        private async Task SaveAlarm(string title, string message, DateTime startDate, AlarmOptions options, NotificationOptions notification)
+        private async Task SaveAlarm(int notificationId, string title, string message, DateTime startDate, AlarmOptions options, NotificationOptions notification)
         {
             try
             {
-                var resp = await _alarmRepo.InsertAsync(new AlarmEntity { Message = message, StartDate = startDate, Title = title });
-                await _optionRepository.InsertAsync(new AlarmOptionEntity
+
+                await _alarmRepo.UpdateOrInsertAsync(new AlarmEntity { Id = notificationId, Message = message, StartDate = startDate, Title = title }, notificationId);
+                await _optionRepository.UpdateOrInsertAsync(new AlarmOptionEntity
                 {
-                    AlarmId = resp,
+                    AlarmId = notificationId,
                     AlarmSequence = options.AlarmSequence,
                     DaysOfWeek = options.DaysOfWeek,
                     EndDate = options.EndDate,
                     Interval = options.Interval,
                     TotalAlarmCount = options.TotalAlarmCount,
+                }, notificationId);
+                await _notificationOptionRepository.UpdateOrInsertAsync(new NotificationOptionEntity
+                {
+                    AlarmId = notificationId,
                     EnableSound = notification.EnableSound,
                     EnableVibration = notification.EnableVibration,
-                    SmallIcon = notification.SmallIcon,
-                    LargeIcon = notification.LargeIcon
-                });
+                    LargeIcon = notification.LargeIcon,
+                    SmallIcon = notification.SmallIcon
+                }, notificationId);
 
-                foreach (var item in options.AdditionalTimes)
-                {
-                    await _timingRepository.InsertAsync(new TimingEntity
+
+                if (options?.AdditionalTimes != null)
+                    foreach (var item in options.AdditionalTimes)
                     {
-                        AlarmId = resp,
-                        Time = item
-                    });
-                }
-                foreach (var item in notification.CustomActions)
-                {
-                    await _customActionRepository.InsertAsync(new CustomActionEntity
+                        await _timingRepository.UpdateOrInsertAsync(new TimingEntity
+                        {
+                            AlarmId = notificationId,
+                            Time = item
+                        }, notificationId);
+                    }
+                if (notification.CustomActions != null)
+                    foreach (var item in notification.CustomActions)
                     {
-                        AlarmId = resp,
-                        Icon = item.Icon,
-                        Name = item.Name
-                    });
-                }
+                        await _customActionRepository.UpdateOrInsertAsync(new CustomActionEntity
+                        {
+                            AlarmId = notificationId,
+                            Icon = item.Icon,
+                            Name = item.Name
+                        }, notificationId);
+                    }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                Console.WriteLine("SQLite : " + ex.Message);
             }
         }
 
@@ -413,42 +424,42 @@ namespace Plugin.Xamarin.Alarmer
 
             return notificationId;
         }
-        public Task<int> Schedule(string title, string message, DateTime startTime, AlarmOptions alarmOptions, NotificationOptions options)
+        public Task<int> Schedule(int? notificationId, string title, string message, DateTime startTime, AlarmOptions alarmOptions, NotificationOptions options)
         {
-            return this.Schedule(title, message, startTime, alarmOptions, options, true);
+            return this.Schedule(notificationId, title, message, startTime, alarmOptions, options, true);
         }
-        private async Task<int> Schedule(string title, string message, DateTime startTime, AlarmOptions alarmOptions, NotificationOptions options, bool isNew = false)
+        public async Task<int> Schedule(int? notificationId, string title, string message, DateTime startTime, AlarmOptions alarmOptions, NotificationOptions options, bool isNew = false)
         {
             var list = GetAlarmIds();
-            int notificationId;
-            if (list.Count > 0)
-                notificationId = list.Max() + 1;
-            else
-                notificationId = 1;
+            if (notificationId == null)
+                if (list.Count > 0)
+                    notificationId = list.Max() + 1;
+                else
+                    notificationId = 1;
 
             if (alarmOptions.AlarmSequence != Enums.AlarmSequence.OneTime)
                 AlarmCounter++;
 
             if (alarmOptions?.TotalAlarmCount != null && alarmOptions?.TotalAlarmCount > 0 && AlarmCounter > alarmOptions.TotalAlarmCount)
-                return notificationId;
+                return notificationId.Value;
 
             if (alarmOptions?.EndDate != null && alarmOptions.EndDate < DateTime.Now)
-                return notificationId;
+                return notificationId.Value;
             DateTime nextTime = CalculateNextTime(startTime, alarmOptions);
             Log.Debug("Alarm", "AlarmNotificationReceiver Schedule : " + AndroidApp.Application.Context.ToString());
-            var alarmIntent = CreateAlarmIntent(title, message, nextTime, alarmOptions, notificationId, options);
-            var pendingIntent = PendingIntent.GetBroadcast(AndroidApp.Application.Context, notificationId, alarmIntent, PendingIntentFlags.CancelCurrent);
+            var alarmIntent = CreateAlarmIntent(title, message, nextTime, alarmOptions, notificationId.Value, options);
+            var pendingIntent = PendingIntent.GetBroadcast(AndroidApp.Application.Context, notificationId.Value, alarmIntent, PendingIntentFlags.CancelCurrent);
 
             SetAlarmManager(nextTime, pendingIntent);
 
             if (isNew)
             {
-                SaveAlarmId(notificationId);
+                SaveAlarmId(notificationId.Value);
 
-                await SaveAlarm(title, message, nextTime, alarmOptions, options);
+                await SaveAlarm(notificationId.Value, title, message, nextTime, alarmOptions, options);
             }
 
-            return notificationId;
+            return notificationId.Value;
         }
 
         public void ReceiveSelectedNotification(string title, string message, int notificationId, string selectedAction)
@@ -480,7 +491,6 @@ namespace Plugin.Xamarin.Alarmer
             Intent intent = new Intent(AndroidApp.Application.Context, typeof(AlarmNotificationReceiver));
             var pendingIntent = PendingIntent.GetBroadcast(AndroidApp.Application.Context, notificationId, intent, PendingIntentFlags.CancelCurrent);
             alarmManager.Cancel(pendingIntent);
-
         }
 
 

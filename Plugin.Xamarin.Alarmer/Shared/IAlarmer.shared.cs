@@ -10,7 +10,7 @@ namespace Plugin.Xamarin.Alarmer.Shared
         public event EventHandler<LocalNotificationEventArgs> NotificationSelectionReceived;
         int AlarmCounter { get; }
         int Notify(string title, string message, int notificationId, NotificationOptions options = null);
-        Task<int> Schedule(string title, string message, DateTime startTime, AlarmOptions alarmOptions, NotificationOptions options);
+        Task<int> Schedule(int? id, string title, string message, DateTime startTime, AlarmOptions alarmOptions, NotificationOptions options);
         void CancelAll();
         void Cancel(int notificationId);
         DateTime GetNextAlarm();

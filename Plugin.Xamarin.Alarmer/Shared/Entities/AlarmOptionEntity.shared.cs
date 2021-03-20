@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using UniCore.Mobile.Contracts.Base;
 
 namespace Plugin.Xamarin.Alarmer.Shared.Entities
@@ -15,9 +13,5 @@ namespace Plugin.Xamarin.Alarmer.Shared.Entities
         public int Interval { get; set; }
         public Enums.DaysOfWeek DaysOfWeek { get; set; }
 
-        public bool EnableSound { get; set; }
-        public bool EnableVibration { get; set; }
-        public string SmallIcon { get; set; }
-        public string LargeIcon { get; set; }
     }
 }

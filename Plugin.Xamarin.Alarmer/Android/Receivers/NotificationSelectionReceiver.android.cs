@@ -31,7 +31,7 @@ namespace Plugin.Xamarin.Alarmer.Android.Receivers
                     alarmer.AlarmCounter = alarmRunCounter - 1;
                     Log.Debug("Alarm", "AlarmNotificationReceiver alarmRunCounter : " + alarmer.AlarmCounter.ToString());
                     DateTime date = DateTime.Now.AddMinutes(15);
-                    alarmer.Schedule(title, message, date, new AlarmOptions { AlarmSequence = Shared.Enums.AlarmSequence.OneTime }, options);
+                    alarmer.Schedule(notificationId,title, message, date, new AlarmOptions { AlarmSequence = Shared.Enums.AlarmSequence.OneTime }, options);
                 }
 
 

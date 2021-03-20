@@ -11,5 +11,6 @@ namespace Plugin.Xamarin.Alarmer.Shared.Models
         public int Interval { get; set; }
         public Enums.DaysOfWeek DaysOfWeek { get; set; }
         public IList<TimeSpan> AdditionalTimes { get; set; }
+
     }
 }

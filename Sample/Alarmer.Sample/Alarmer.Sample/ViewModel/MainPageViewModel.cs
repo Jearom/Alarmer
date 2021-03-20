@@ -178,7 +178,7 @@ namespace Alarmer.Sample.ViewModel
                 if (IsEndDate)
                     _endDate = new DateTime(EndDate.Year, EndDate.Month, EndDate.Day, SelectedEndTime.Hours, SelectedEndTime.Minutes, SelectedEndTime.Seconds);
 
-                _alarmer.Schedule("Test Title", "Test Message", dateTime, new Plugin.Xamarin.Alarmer.Shared.Models.AlarmOptions
+                _alarmer.Schedule(null, "Test Title", "Test Message", dateTime, new Plugin.Xamarin.Alarmer.Shared.Models.AlarmOptions
                 {
                     AlarmSequence = (Enums.AlarmSequence)SelectedSequnce.Value,
                     Interval = Interval,
