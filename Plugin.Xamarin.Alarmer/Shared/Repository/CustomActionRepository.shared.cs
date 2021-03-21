@@ -1,5 +1,6 @@
 ﻿using Plugin.Xamarin.Alarmer.Shared.Constants;
 using Plugin.Xamarin.Alarmer.Shared.Entities;
+using SQLite;
 using System;
 using System.IO;
 using UniCore.Mobile.Extension.SQLite;
@@ -27,6 +28,7 @@ namespace Plugin.Xamarin.Alarmer.Shared.Repository
 
         public CustomActionRepository() : base(_path, Flags)
         {
+          
         }
     }
 }

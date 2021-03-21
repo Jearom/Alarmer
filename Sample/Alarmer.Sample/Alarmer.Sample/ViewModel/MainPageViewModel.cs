@@ -29,6 +29,7 @@ namespace Alarmer.Sample.ViewModel
         readonly IAlarmer _alarmer;
         public MainPageViewModel()
         {
+
             _alarmer = DependencyService.Get<IAlarmer>();
             _alarmer.NotificationReceived += Notificationreceived;
             _alarmer.NotificationSelectionReceived += NotificationSelectionReceived;
@@ -144,6 +145,12 @@ namespace Alarmer.Sample.ViewModel
         }
 
 
+        public ICommand GotoListPage => new Command(() =>
+        {
+            Xamarin.Forms.Application.Current.MainPage = new ListPage();
+
+        });
+
         public ICommand StartAlarm => new Command(() =>
         {
             try
@@ -167,7 +174,7 @@ namespace Alarmer.Sample.ViewModel
 
         });
 
-        public ICommand ScheduleAlarm => new Command(() =>
+        public ICommand ScheduleAlarm => new Command(async () =>
         {
             DateTime dateTime = new DateTime(SelectedDate.Year, SelectedDate.Month, SelectedDate.Day, selectedTime.Hours, selectedTime.Minutes, selectedTime.Seconds);
 
@@ -178,24 +185,23 @@ namespace Alarmer.Sample.ViewModel
                 if (IsEndDate)
                     _endDate = new DateTime(EndDate.Year, EndDate.Month, EndDate.Day, SelectedEndTime.Hours, SelectedEndTime.Minutes, SelectedEndTime.Seconds);
 
-                _alarmer.Schedule(null, "Test Title", "Test Message", dateTime, new Plugin.Xamarin.Alarmer.Shared.Models.AlarmOptions
+                await _alarmer.Schedule(null, "Test Title", "Test Message", dateTime, new Plugin.Xamarin.Alarmer.Shared.Models.AlarmOptions
                 {
                     AlarmSequence = (Enums.AlarmSequence)SelectedSequnce.Value,
                     Interval = Interval,
                     EndDate = _endDate,
                     TotalAlarmCount = MaxCount
                 },
-                    new Plugin.Xamarin.Alarmer.Shared.Models.NotificationOptions
-                    {
-                        EnableSound = true,
-                        EnableVibration = true,
-                        SmallIcon = "ic_alarm",
-                        CustomActions = new Plugin.Xamarin.Alarmer.Shared.Models.CustomAction[] { new Plugin.Xamarin.Alarmer.Shared.Models.CustomAction {
+                       new Plugin.Xamarin.Alarmer.Shared.Models.NotificationOptions
+                       {
+                           EnableSound = true,
+                           EnableVibration = true,
+                           SmallIcon = "ic_alarm",
+                           CustomActions = new Plugin.Xamarin.Alarmer.Shared.Models.CustomAction[] { new Plugin.Xamarin.Alarmer.Shared.Models.CustomAction {
                     Icon = "ic_alarm",
                     Name = "Snooze"
                     } }
-                    });
-
+                       });
             }
             catch (Exception e)
             {

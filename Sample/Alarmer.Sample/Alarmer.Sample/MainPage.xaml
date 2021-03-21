@@ -36,6 +36,7 @@
         </StackLayout>
 
         <StackLayout VerticalOptions="EndAndExpand">
+            <Button Text="Go To Alarm List" Command="{Binding GotoListPage}"/>
             <Button Text="Start Alarm" Command="{Binding StartAlarm}"/>
             <Button Text="Schedule Alarm" Command="{Binding ScheduleAlarm}"/>
         </StackLayout>

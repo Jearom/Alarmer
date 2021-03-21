@@ -83,10 +83,8 @@ namespace Plugin.Xamarin.Alarmer.Android.Receivers
         private async Task StartAfterReboot(AlarmerImplementation alarmer)
         {
             AlarmRepository _alarmRepo = new AlarmRepository();
-            AlarmOptionRepository _optionRepository = new AlarmOptionRepository();
             TimingRepository _timingRepository = new TimingRepository();
             CustomActionRepository _customActionRepository = new CustomActionRepository();
-            NotificationOptionRepository _notificationOptionRepository = new NotificationOptionRepository();
 
             try
             {
@@ -95,27 +93,25 @@ namespace Plugin.Xamarin.Alarmer.Android.Receivers
                 if (alarmList != null && alarmList.Count > 0)
                     foreach (var alarm in alarmList)
                     {
-                        var options = await _optionRepository.GetAsync(alarm.Id);
                         var timings = await _timingRepository.QueryAsync().Where(w => w.AlarmId == alarm.Id).ToArrayAsync();
-                        var notificationOptions = await _notificationOptionRepository.GetAsync(alarm.Id);
                         var customs = await _customActionRepository.QueryAsync().Where(w => w.AlarmId == alarm.Id).ToArrayAsync();
 
                         var alarmOption = new AlarmOptions
                         {
-                            EndDate = options.EndDate,
+                            EndDate = alarm.EndDate,
                             AdditionalTimes = timings.Select(s => s.Time).ToArray(),
-                            AlarmSequence = options.AlarmSequence,
-                            DaysOfWeek = options.DaysOfWeek,
-                            Interval = options.Interval,
-                            TotalAlarmCount = options.TotalAlarmCount
+                            AlarmSequence = alarm.AlarmSequence,
+                            DaysOfWeek = alarm.DaysOfWeek,
+                            Interval = alarm.Interval,
+                            TotalAlarmCount = alarm.TotalAlarmCount
                         };
 
                         var notification = new NotificationOptions
                         {
-                            EnableSound = notificationOptions.EnableSound,
-                            EnableVibration = notificationOptions.EnableVibration,
-                            LargeIcon = notificationOptions.LargeIcon,
-                            SmallIcon = notificationOptions.SmallIcon,
+                            EnableSound = alarm.EnableSound,
+                            EnableVibration = alarm.EnableVibration,
+                            LargeIcon = alarm.LargeIcon,
+                            SmallIcon = alarm.SmallIcon,
                             CustomActions = customs.Select(s => { return new CustomAction { Icon = s.Icon, Name = s.Name }; }).ToArray()
                         };
 

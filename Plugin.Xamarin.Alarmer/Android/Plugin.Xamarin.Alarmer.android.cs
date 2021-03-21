@@ -5,7 +5,6 @@ using Android.Media;
 using Android.OS;
 using Android.Support.V4.App;
 using Android.Util;
-using AndroidX.Work;
 using Newtonsoft.Json;
 using Plugin.Xamarin.Alarmer;
 using Plugin.Xamarin.Alarmer.Android.Receivers;
@@ -37,18 +36,14 @@ namespace Plugin.Xamarin.Alarmer
         int messageId = -1;
 
         AlarmRepository _alarmRepo;
-        AlarmOptionRepository _optionRepository;
         TimingRepository _timingRepository;
         CustomActionRepository _customActionRepository;
-        NotificationOptionRepository _notificationOptionRepository;
 
         public AlarmerImplementation()
         {
             _alarmRepo = new AlarmRepository();
-            _optionRepository = new AlarmOptionRepository();
             _timingRepository = new TimingRepository();
             _customActionRepository = new CustomActionRepository();
-            _notificationOptionRepository = new NotificationOptionRepository();
         }
 
         public int AlarmCounter { get; internal set; }
@@ -294,30 +289,118 @@ namespace Plugin.Xamarin.Alarmer
 
         }
 
+        public async Task<AlarmModel> GetAlarm(int id)
+        {
+            var alarmEntity = await _alarmRepo.GetAsync(id);
+            var customActionEntity = await _customActionRepository.QueryAsync().Where(w => w.AlarmId == id).ToArrayAsync();
+            var timingEntity = await _timingRepository.QueryAsync().Where(w => w.AlarmId == id).ToArrayAsync();
+
+            if (alarmEntity != null)
+            {
+                AlarmModel model = new AlarmModel();
+                AlarmOptions options = new AlarmOptions();
+                NotificationOptions notification = new NotificationOptions();
+
+                options = new AlarmOptions
+                {
+                    AdditionalTimes = timingEntity?.Select(s => s.Time).ToArray(),
+                    AlarmSequence = alarmEntity.AlarmSequence,
+                    DaysOfWeek = alarmEntity.DaysOfWeek,
+                    EndDate = alarmEntity.EndDate,
+                    Interval = alarmEntity.Interval,
+                    TotalAlarmCount = alarmEntity.TotalAlarmCount
+
+                };
+                model.AlarmOptions = options;
+
+                notification = new NotificationOptions
+                {
+                    EnableSound = alarmEntity.EnableSound,
+                    EnableVibration = alarmEntity.EnableVibration,
+                    LargeIcon = alarmEntity.LargeIcon,
+                    SmallIcon = alarmEntity.SmallIcon,
+                    CustomActions = customActionEntity?.Select(s => { return new CustomAction { Icon = s.Icon, Name = s.Name }; }).ToArray()
+                };
+
+                model.NotificationOptions = notification;
+
+
+                model.Id = alarmEntity.Id;
+                model.Message = alarmEntity.Message;
+                model.StartDate = alarmEntity.StartDate;
+                model.Title = alarmEntity.Title;
+
+                return model;
+            }
+
+            return null;
+
+        }
+
+        public async Task<List<AlarmModel>> GetAlarmList()
+        {
+            var alarmEntity = await _alarmRepo.GetListAsync();
+            var timings = await _timingRepository.GetListAsync();
+            var customActionEntity = await _customActionRepository.GetListAsync();
+
+            return alarmEntity.Select(s =>
+             {
+                 return new AlarmModel
+                 {
+                     Id = s.Id,
+                     Message = s.Message,
+                     Title = s.Title,
+                     StartDate = s.StartDate,
+                     AlarmOptions = new AlarmOptions
+                     {
+                         AlarmSequence = s.AlarmSequence,
+                         TotalAlarmCount = s.TotalAlarmCount,
+                         Interval = s.Interval,
+                         EndDate = s.EndDate,
+                         DaysOfWeek = s.DaysOfWeek,
+                         AdditionalTimes = timings.Where(w => w.AlarmId == s.Id).Select(s => s.Time).ToArray(),
+                         IsEnabled = s.IsEnabled
+                     },
+                     NotificationOptions = new NotificationOptions
+                     {
+                         EnableSound = s.EnableSound,
+                         EnableVibration = s.EnableVibration,
+                         SmallIcon = s.SmallIcon,
+                         LargeIcon = s.LargeIcon,
+                         CustomActions = customActionEntity.Where(w => w.AlarmId == s.Id).Select(s => { return new CustomAction { Icon = s.Icon, Name = s.Name }; }).ToArray()
+                     }
+                 };
+             }).ToList();
+        }
+
         private async Task SaveAlarm(int notificationId, string title, string message, DateTime startDate, AlarmOptions options, NotificationOptions notification)
         {
             try
             {
 
-                await _alarmRepo.UpdateOrInsertAsync(new AlarmEntity { Id = notificationId, Message = message, StartDate = startDate, Title = title }, notificationId);
-                await _optionRepository.UpdateOrInsertAsync(new AlarmOptionEntity
+                var entity = new AlarmEntity
                 {
-                    AlarmId = notificationId,
-                    AlarmSequence = options.AlarmSequence,
-                    DaysOfWeek = options.DaysOfWeek,
-                    EndDate = options.EndDate,
-                    Interval = options.Interval,
-                    TotalAlarmCount = options.TotalAlarmCount,
-                }, notificationId);
-                await _notificationOptionRepository.UpdateOrInsertAsync(new NotificationOptionEntity
-                {
-                    AlarmId = notificationId,
-                    EnableSound = notification.EnableSound,
-                    EnableVibration = notification.EnableVibration,
-                    LargeIcon = notification.LargeIcon,
-                    SmallIcon = notification.SmallIcon
-                }, notificationId);
+                    Id = notificationId,
+                    Message = message,
+                    StartDate = startDate,
+                    Title = title
+                };
 
+                if (options != null)
+                {
+                    entity.AlarmSequence = options.AlarmSequence;
+                    entity.DaysOfWeek = options.DaysOfWeek;
+                    entity.EndDate = options.EndDate;
+                    entity.Interval = options.Interval;
+                    entity.TotalAlarmCount = options.TotalAlarmCount;
+                    entity.IsEnabled = options.IsEnabled;
+                    entity.EnableSound = notification.EnableSound;
+                    entity.EnableVibration = notification.EnableVibration;
+                    entity.LargeIcon = notification.LargeIcon;
+                    entity.SmallIcon = notification.SmallIcon;
+                }
+
+                await _alarmRepo.UpdateOrInsertAsync(entity, notificationId);
 
                 if (options?.AdditionalTimes != null)
                     foreach (var item in options.AdditionalTimes)

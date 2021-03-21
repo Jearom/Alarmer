@@ -9,6 +9,7 @@ namespace Plugin.Xamarin.Alarmer.Shared.Models
         public DateTime? EndDate { get; set; }
         public int? TotalAlarmCount { get; set; }
         public int Interval { get; set; }
+        public bool IsEnabled { get; set; }
         public Enums.DaysOfWeek DaysOfWeek { get; set; }
         public IList<TimeSpan> AdditionalTimes { get; set; }
 

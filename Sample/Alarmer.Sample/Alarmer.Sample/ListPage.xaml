@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:wm="clr-namespace:Alarmer.Sample.ViewModel"
+             x:Class="Alarmer.Sample.ListPage">
+    <ContentPage.BindingContext>
+        <wm:ListPageViewModel/>
+    </ContentPage.BindingContext>
+    <ContentPage.Content>
+        <StackLayout>
+            <Label Text="Welcome to Xamarin.Forms!"
+                VerticalOptions="CenterAndExpand" 
+                HorizontalOptions="CenterAndExpand" />
+            <CollectionView ItemsSource="{Binding Alarms}" BackgroundColor="Green">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame HasShadow="True" IsClippedToBounds="True">
+                            <StackLayout BackgroundColor="LightBlue">
+                                <Label Text="{Binding Title}" TextColor="Black"/>
+                                <Label Text="{Binding Message}" TextColor="Black"/>
+                                <Label Text="{Binding StartDate}" TextColor="Black"/>
+                            </StackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+            <Button Text="Go To Main Page" Command="{Binding GotoMainPage}"/>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

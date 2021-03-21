@@ -2,6 +2,7 @@
 using Plugin.Xamarin.Alarmer.Shared;
 using Plugin.Xamarin.Alarmer.Shared.Models;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
@@ -24,6 +25,16 @@ namespace Plugin.Xamarin.Alarmer
         }
 
         public void CancelAll()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<AlarmModel> GetAlarm(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<AlarmModel>> GetAlarmList()
         {
             throw new NotImplementedException();
         }
