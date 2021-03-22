@@ -14,9 +14,9 @@
 		<PackageId>Plugin.Xamarin.Alarmer</PackageId>
 
 		<Product>$(AssemblyName) ($(TargetFramework))</Product>
-		<AssemblyVersion>1.0.1.7</AssemblyVersion>
+		<AssemblyVersion>1.0.1.8</AssemblyVersion>
 		<AssemblyFileVersion>1.0.1.7</AssemblyFileVersion>
-		<Version>1.0.1.7</Version>
+		<Version>1.0.1.8</Version>
 		<PackageVersion>1.0.1.7</PackageVersion>
 		<PackOnBuild>true</PackOnBuild>
 		<NeutralLanguage>en</NeutralLanguage>
@@ -49,7 +49,7 @@
 		<!--When built in 2019 will remove extra references on pack-->
 		<DisableExtraReferences>true</DisableExtraReferences>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<FileVersion>1.0.1.4</FileVersion>
+		<FileVersion>1.0.1.8</FileVersion>
 		<PackageLicenseExpression></PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 		<PackageLicenseFile>LICENCE.txt</PackageLicenseFile>
