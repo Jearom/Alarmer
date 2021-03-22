@@ -29,6 +29,16 @@ namespace Plugin.Xamarin.Alarmer
             throw new NotImplementedException();
         }
 
+        public Task DisableAlarm(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task EnableAlarm(int id)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<AlarmModel> GetAlarm(int id)
         {
             throw new NotImplementedException();
