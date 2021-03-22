@@ -50,7 +50,9 @@ _alarmer.Schedule("Test Title", "Test Message", dateTime, new Plugin.Xamarin.Ala
                     } }
                     });
 ````
+## Others
 
+EnableAlarm and DisableAlarm functions added.
 
 
 ## Contributing
