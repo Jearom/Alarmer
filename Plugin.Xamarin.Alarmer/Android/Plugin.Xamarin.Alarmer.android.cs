@@ -284,11 +284,6 @@ namespace Plugin.Xamarin.Alarmer
             SaveAlarmIds(list);
         }
 
-        public async Task ReSetAlarms()
-        {
-
-        }
-
         public async Task<AlarmModel> GetAlarm(int id)
         {
             var alarmEntity = await _alarmRepo.GetAsync(id);
@@ -371,6 +366,24 @@ namespace Plugin.Xamarin.Alarmer
                      }
                  };
              }).ToList();
+        }
+
+        public async Task DisableAlarm(int id)
+        {
+            var alarmEntity = await _alarmRepo.GetAsync(id);
+            if (alarmEntity == null)
+                return;
+            alarmEntity.IsEnabled = false;
+            await _alarmRepo.UpdateAsync(alarmEntity);
+        }
+
+        public async Task EnableAlarm(int id)
+        {
+            var alarmEntity = await _alarmRepo.GetAsync(id);
+            if (alarmEntity == null)
+                return;
+            alarmEntity.IsEnabled = true;
+            await _alarmRepo.UpdateAsync(alarmEntity);
         }
 
         private async Task SaveAlarm(int notificationId, string title, string message, DateTime startDate, AlarmOptions options, NotificationOptions notification)

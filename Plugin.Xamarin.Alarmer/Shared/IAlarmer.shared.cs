@@ -12,6 +12,8 @@ namespace Plugin.Xamarin.Alarmer.Shared
         int AlarmCounter { get; }
         int Notify(string title, string message, int notificationId, NotificationOptions options = null);
         Task<int> Schedule(int? id, string title, string message, DateTime startTime, AlarmOptions alarmOptions, NotificationOptions options);
+        Task EnableAlarm(int id);
+        Task DisableAlarm(int id);
         void CancelAll();
         void Cancel(int notificationId);
         DateTime GetNextAlarm();
