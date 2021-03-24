@@ -14,10 +14,10 @@
 		<PackageId>Plugin.Xamarin.Alarmer</PackageId>
 
 		<Product>$(AssemblyName) ($(TargetFramework))</Product>
-		<AssemblyVersion>1.0.1.8</AssemblyVersion>
-		<AssemblyFileVersion>1.0.1.8</AssemblyFileVersion>
-		<Version>1.0.1.8</Version>
-		<PackageVersion>1.0.1.8</PackageVersion>
+		<AssemblyVersion>1.0.1.9</AssemblyVersion>
+		<AssemblyFileVersion>1.0.1.9</AssemblyFileVersion>
+		<Version>1.0.1.9</Version>
+		<PackageVersion>1.0.1.9</PackageVersion>
 		<PackOnBuild>true</PackOnBuild>
 		<NeutralLanguage>en</NeutralLanguage>
 		<LangVersion>default</LangVersion>
@@ -49,7 +49,7 @@
 		<!--When built in 2019 will remove extra references on pack-->
 		<DisableExtraReferences>true</DisableExtraReferences>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<FileVersion>1.0.1.8</FileVersion>
+		<FileVersion>1.0.1.9</FileVersion>
 		<PackageLicenseExpression></PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 		<PackageLicenseFile>LICENCE.txt</PackageLicenseFile>
@@ -89,9 +89,10 @@
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'MonoAndroid90'">
 		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-		<PackageReference Include="Xamarin.Android.Arch.Work.Runtime">
-		  <Version>1.0.0.3</Version>
+		<PackageReference Include="Xamarin.AndroidX.Work.Runtime">
+		  <Version>2.5.0.1</Version>
 		</PackageReference>
+		
 	</ItemGroup>
 
 	<ItemGroup>

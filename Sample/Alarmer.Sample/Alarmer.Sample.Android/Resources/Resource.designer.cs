@@ -3141,10 +3141,7 @@ namespace Alarmer.Sample.Droid
 			global::Plugin.Xamarin.Alarmer.Resource.Boolean.abc_action_bar_embed_tabs = global::Alarmer.Sample.Droid.Resource.Boolean.abc_action_bar_embed_tabs;
 			global::Plugin.Xamarin.Alarmer.Resource.Boolean.abc_allow_stacked_button_bar = global::Alarmer.Sample.Droid.Resource.Boolean.abc_allow_stacked_button_bar;
 			global::Plugin.Xamarin.Alarmer.Resource.Boolean.abc_config_actionMenuItemAllCaps = global::Alarmer.Sample.Droid.Resource.Boolean.abc_config_actionMenuItemAllCaps;
-			global::Plugin.Xamarin.Alarmer.Resource.Boolean.enable_system_alarm_service_default = global::Alarmer.Sample.Droid.Resource.Boolean.enable_system_alarm_service_default;
-			global::Plugin.Xamarin.Alarmer.Resource.Boolean.enable_system_job_service_default = global::Alarmer.Sample.Droid.Resource.Boolean.enable_system_job_service_default;
 			global::Plugin.Xamarin.Alarmer.Resource.Boolean.mtrl_btn_textappearance_all_caps = global::Alarmer.Sample.Droid.Resource.Boolean.mtrl_btn_textappearance_all_caps;
-			global::Plugin.Xamarin.Alarmer.Resource.Boolean.workmanager_test_configuration = global::Alarmer.Sample.Droid.Resource.Boolean.workmanager_test_configuration;
 			global::Plugin.Xamarin.Alarmer.Resource.Color.abc_background_cache_hint_selector_material_dark = global::Alarmer.Sample.Droid.Resource.Color.abc_background_cache_hint_selector_material_dark;
 			global::Plugin.Xamarin.Alarmer.Resource.Color.abc_background_cache_hint_selector_material_light = global::Alarmer.Sample.Droid.Resource.Color.abc_background_cache_hint_selector_material_light;
 			global::Plugin.Xamarin.Alarmer.Resource.Color.abc_btn_colored_borderless_text_material = global::Alarmer.Sample.Droid.Resource.Color.abc_btn_colored_borderless_text_material;
@@ -12178,16 +12175,7 @@ namespace Alarmer.Sample.Droid
 			public const int abc_config_actionMenuItemAllCaps = 2130968578;
 			
 			// aapt resource value: 0x7F040003
-			public const int enable_system_alarm_service_default = 2130968579;
-			
-			// aapt resource value: 0x7F040004
-			public const int enable_system_job_service_default = 2130968580;
-			
-			// aapt resource value: 0x7F040005
-			public const int mtrl_btn_textappearance_all_caps = 2130968581;
-			
-			// aapt resource value: 0x7F040006
-			public const int workmanager_test_configuration = 2130968582;
+			public const int mtrl_btn_textappearance_all_caps = 2130968579;
 			
 			static Boolean()
 			{
